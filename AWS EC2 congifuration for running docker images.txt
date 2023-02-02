@@ -1,0 +1,71 @@
+Process :
+1. Launch an EC2 instance with all the required configurations and permissions, make sure to allow all traffic and ssh in security group.
+
+2. Connect to the instance as follows	
+	connect with ssh or putty
+		for putty 
+			-> download pem file and generate private key
+			-> use the IP Address and have it provided while connecting
+			-> in Auth section, provide the generated private key
+		for direct ssh
+			-> ssh -i "{{.pem file path}}" ec2-user@{{EC2 domain name}}
+			
+3.once connection is successful run below commands to install docker
+		sudo yum update -y
+		sudo yum install -y docker
+		sudo service docker start
+		sudo usermod -a -G docker ec2-user 
+		<<exit and relogin again>>
+		docker info
+		docker ps
+
+4. Check AWS cli version and make sure it is above 1.7 if not upgrade as per below 
+	
+	Upgrade aws cli to the latest version if not present in EC2
+	curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+	unzip awscliv2.zip
+	sudo ./aws/install
+	sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+	aws --version
+	//aws cli upgrade	
+
+5. Add below credentials or create an user in IAM with EC2ContaineryFullAccess and S3FullAccess permissions
+	aws configure	
+	AWS CLI permissions grants credential
+		{{AWS IAM User id}}
+		{{AWS IAM User Password}}
+		{{AWS region}}
+		json
+
+6. Install Docker Compose:
+	sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+	sudo chmod +x /usr/local/bin/docker-compose
+	docker-compose version
+
+7. Authenticate with ECR using the below (for private repositories)	
+	Authentication Command to Authenticate with ECR
+	aws ecr get-login-password --region {{AWS region}} | docker login --username AWS --password-stdin {{AWS Account id}}.dkr.ecr.{{AWS region}}.amazonaws.com
+
+8. Pull all the docker images one by one from ECR
+   docker pull	<URI>
+
+9. To Start the services:
+	aws s3 cp s3:{{file path in S3}} docker-compose-prod.yml
+	docker-compose -f docker-compose-prod.yml up -d
+	docker ps
+	
+10 Verify the container run
+	docker ps
+	verify by running eureka and api tests
+	
+11.To connect to the specific container:
+	docker exec -t -i app-productserver /bin/bash
+
+12.Some Useful docker commands:	
+	docker-compose -f docker-compose-prod.yml down --rmi all
+	docker-compose -f docker-compose-prod.yml pull
+	docker logs --follow <<container name>>
+	docker run -d -p <port>:<port> --network host <complete uri>
+	
+
+

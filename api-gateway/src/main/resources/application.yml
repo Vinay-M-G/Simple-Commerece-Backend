@@ -1,0 +1,50 @@
+spring:
+   application:
+      name: APIGATEWAY   
+   cloud:
+      gateway:
+         discovery:
+            locator:
+               enabled: true
+         routes:
+            - id: products
+              uri: lb://PRODUCTSERVER
+              predicates:
+              - Path=/api/v1/products/**
+            - id: welcome
+              uri: lb://WELCOMESERVER
+              predicates:
+              - Path=/api/v1/welcome/**
+            - id: UserService
+              uri: lb://USERANDCARTSERVER
+              predicates:
+              - Path=/api/v1/user/**
+            - id: CartService
+              uri: lb://USERANDCARTSERVER
+              predicates:
+              - Path=/api/v1/carts/**            
+         default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+         globalcors:
+            corsConfigurations:
+               '[/**]':
+                    allowedOriginPatterns: "*"
+                    allowedMethods: "*"
+                    allowedHeaders: "*"
+                    allow-credentials: true
+                           
+server:
+   port: 9001
+
+eureka:
+   client:
+      serviceURL:
+         defaultZone: http://localhost:8761/eureka
+management:
+   endpoint:
+      gateway:
+         enabled: true
+   endpoints:
+      web:
+         exposure:
+            include: gateway

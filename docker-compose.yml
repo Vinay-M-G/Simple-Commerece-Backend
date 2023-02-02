@@ -1,0 +1,42 @@
+version: '2'
+services:
+    # eureka-server:
+        # container_name: app-eurekaserver
+        # build:
+            # context: ./EurekaService
+            # dockerfile: Dockerfile
+        # image: app-eurekaserver:latest
+       # ports:
+           # - 8761:8761
+    product-server:
+        container_name: app-productserver
+        build:
+            context: ./ProductService
+            dockerfile: Dockerfile
+        image: app-productserver:latest
+       # ports:
+           # - 2001:2001
+    welcome-server:
+        container_name: app-welcomeserver
+        build:
+            context: ./WelcomeService
+            dockerfile: Dockerfile
+        image: app-welcomeserver:latest
+       # ports:
+           # - 1001:1001
+    api-gateway:
+        container_name: app-apigateway
+        build:
+            context: ./api-gateway
+            dockerfile: Dockerfile
+        image: app-apigateway:latest
+       # ports:
+           # - 9001:9001
+    user-and-cart-service:
+        container_name: app-userandcartservice
+        build:
+            context: ./UserAndCartService
+            dockerfile: Dockerfile
+        image: app-userandcartservice:latest
+       # ports:
+           # - 3001:3001           

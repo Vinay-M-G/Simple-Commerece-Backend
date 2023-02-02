@@ -1,0 +1,55 @@
+version: '3.7'
+services:
+   eureka-server:
+      container_name: app-eurekaserver
+      image: {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-eurekaserver:latesteureka
+      ports:
+        - 8761:8761
+      network_mode: "host"  
+   product-server:
+      container_name: app-productserver
+      image: {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-productserver:latest
+      ports:
+        - 2001:2001
+      network_mode: "host"
+      environment:
+        - spring.datasource.url=jdbc:mysql:{{DB Url}}
+        - spring.datasource.username={{username}}
+        - spring.datasource.password={{password}}
+      depends_on:
+        - eureka-server  
+   welcome-server:
+      container_name: app-welcomeserver
+      image: {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-welcomeserver:latest
+      ports:
+        - 1001:1001
+      network_mode: "host"
+      environment:
+        - spring.datasource.url=jdbc:mysql:{{DB Url}}
+        - spring.datasource.username={{username}}
+        - spring.datasource.password={{password}}
+      depends_on:
+        - eureka-server  
+   userandcart-server:
+      container_name: app-userandcartservice
+      image: {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-userandcartservice:latest
+      ports:
+        - 3001:3001
+      network_mode: "host"
+      environment:
+        - spring.datasource.url=jdbc:mysql:{{DB Url}}
+        - spring.datasource.username={{username}}
+        - spring.datasource.password={{password}}
+      depends_on:
+        - eureka-server
+   apigateway-server:
+      container_name: app-apigateway
+      image: {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-apigateway:latest
+      ports:
+        - 9001:9001
+      network_mode: "host"
+      depends_on:
+        - eureka-server
+        - product-server
+        - welcome-server
+        - userandcart-server   

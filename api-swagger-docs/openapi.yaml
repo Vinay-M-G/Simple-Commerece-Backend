@@ -1,0 +1,825 @@
+openapi: 3.0.3
+info:
+  title: NightFury ECommerce Application
+  description: >-
+    This is E-commmerce API which provides simple endpoints which can be used by
+    anyone to instantly to lauch a backend Ecommerece servers with minimum
+    customizations and also helps to scale within less time
+  contact:
+    email: vinay.giriswamy@gmail.com
+  version: 2.0.4
+servers:
+  - url: http://{EC2 Server Id}:9001/api/v1
+    variables:
+      EC2 Server Id:
+        default: Add_domain_here
+tags:
+  - name: Products Controller
+    description: Everything about products section
+  - name: Carts Controller
+    description: Everything about carts
+  - name: User Controller
+    description: Everything about user flow
+paths:
+  /products/listall:
+    get:
+      tags:
+        - Products Controller
+      summary: provides details of all products
+      description: prodvides a view of all the products present in the catalogue
+      responses:
+        '200':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BaseProductModel'
+  /products/list:
+    get:
+      tags:
+        - Products Controller
+      summary: provides details of all products based on criteria set
+      description: >-
+        prodvides a view of all the products present in the catalogue based on
+        criteria set
+      parameters:
+        - name: category
+          in: query
+          description: Provide multiple categories with comma seperated
+          required: true
+          schema:
+            type: string
+        - name: sortby
+          in: query
+          description: Provide any one of the sort option
+          required: true
+          schema:
+            type: string
+            enum:
+              - highestprice
+              - stockstatus
+              - lowestprice
+        - name: filterby
+          in: query
+          description: |-
+            provide multiple filter options with comma seperated.
+            Available options
+              - availability
+              - stock
+              - price
+              
+            Send Multiple options with comma seperations  
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BaseProductModel'
+  /products/productview/{productCode}:
+    get:
+      tags:
+        - Products Controller
+      summary: provides a view of a product
+      description: prodvides a view of a product
+      parameters:
+        - name: productCode
+          in: path
+          description: provide 8 digit product code
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseProductModel'
+  /products/productserviceview/{productCode}:
+    get:
+      tags:
+        - Products Controller
+      summary: provides a list of product services available for product
+      description: |-
+        provides a list of product services available for product.
+        if no services are available sends a json object as follows 
+        ```
+        {"Warning": "No Services found"}
+        ```
+      parameters:
+        - name: productCode
+          in: path
+          description: provide 8 digit product code
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceModel'
+  /products/productdeliveryserviceview:
+    get:
+      tags:
+        - Products Controller
+      summary: provides a list of product services available for product
+      description: |-
+        - provides a list of Delivery services available for product.
+        - if no services are available then a default/fallback service is sent
+      parameters:
+        - name: productCode
+          in: query
+          description: |-
+            - provide 8 digit product codes with comma seperated
+            - Eg: 90203903,92073822,23029202
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    serviceType:
+                      type: string
+                      enum:
+                        - Delivery
+                        - Product
+                    priceValues:
+                      type: object
+                      properties:
+                        basePrice:
+                          type: number
+                        offerPrice:
+                          type: number
+                    isMultiplier:
+                      type: boolean
+                    serviceDescription:
+                      type: string
+                    serviceName:
+                      type: string
+                    serviceId:
+                      type: string
+  /user/createregistereduser:
+    post:
+      tags:
+        - User Controller
+      summary: Allows user to create Account
+      description: Allows user to create Account
+      requestBody:
+        required: true
+        description: Request Body for Creating Account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountModel'
+      responses:
+        '201':
+          description: Successfull response
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: boolean
+                    default: false
+                  errorMessage:
+                    type: string
+                    default: null
+        '409':
+          description: Error Response
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: boolean
+                    default: true
+                  errorMessage:
+                    type: string
+  /user/createguestuser:
+    post:
+      tags:
+        - User Controller
+      summary: Allows user to create Account for Guest User
+      description: Allows user to create Account for Guest User
+      requestBody:
+        required: true
+        description: Request Body for Creating guest Account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuestUserModel'
+      responses:
+        '201':
+          description: Successfull response
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authStatus: 
+                    type: string
+                    default: Success
+                  errorMessage:
+                    type: string
+                    default: null 
+                  guid:
+                    type: string
+                  error:
+                    type: boolean
+                    default: false
+        '409':
+          description: Error response
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authStatus: 
+                    type: string
+                    default: Failed
+                  errorMessage:
+                    type: string
+                  error:
+                    type: boolean
+                    default: true            
+  /user/reguserlogin:
+    post:
+      tags:
+        - User Controller
+      summary: Allows registered user to login
+      description: Allows registered user to login
+      requestBody:
+        required: true
+        description: Request Body for Creating guest Account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginModel'
+      responses:
+        '201':
+          description: Successfull response
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authStatus: 
+                    type: string
+                    default: Success
+                  errorMessage:
+                    type: string
+                    default: null 
+                  guid:
+                    type: string
+                  error:
+                    type: boolean
+                    default: false
+        '409':
+          description: Error response
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authStatus: 
+                    type: string
+                    default: Failed
+                  errorMessage:
+                    type: string
+                  error:
+                    type: boolean
+                    default: true
+  /user/updateaddress:
+    post:
+      tags:
+        - User Controller
+      summary: Allows users to update the shipping and billing address
+      description: |-
+        A single endpoint to update user address for both cart level and user level. Works both for guest and registered user
+      parameters:
+        - name: guid
+          in: header
+          description: provide guid of the basket to identify basket
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Request Body for updating user address
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                line1:
+                  type: string
+                line2:
+                  type: string
+                pincode:
+                  type: string
+                countryCode:
+                  type: string
+                country: 
+                  type: string
+                phoneNumber:
+                  type: string
+                city:
+                  type: string
+                state:
+                  type: string
+                addressTitle:
+                  type: string
+                isBusnisessOrder:
+                  type: boolean
+                companyName:
+                  type: string
+                isBillingAddress:
+                  type: boolean
+      responses:
+        '201':
+          description: Successfull response
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: boolean
+                    default: false
+        '409':
+          description: Error response
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: boolean
+                    default: true                  
+  /user/getaddresslist:
+    get:
+      tags:
+        - User Controller
+      summary: provides address values based on the previous address details provided by the user
+      description: provides address details based on previous history
+      parameters:
+        - name: busnisessType
+          in: query
+          description: |-
+            - adrress recommendations will be provided based on B2B or B2C
+          required: true
+          schema:
+            type: string
+        - name: guid
+          in: header
+          description: provide guid of the basket to identify basket
+          required: true
+          schema:
+            type: string    
+      responses:
+        '200':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressModel'
+        '409':
+          description: Error response
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: boolean
+                    default: true                  
+  /carts/basketproductupdate/:
+    patch:
+      tags:
+        - Carts Controller
+      summary: Updates product quantity 
+      description: |-
+        - Adds specified quantity of product
+        - Send 0 to remove product from basket
+      parameters:
+        - name: productCode
+          in: query
+          description: provide 9 digit product code
+          required: true
+          schema:
+            type: string
+        - name: quantity
+          in: query
+          description: provide quantity of product
+          required: true
+          schema:
+            type: integer
+        - name: guid
+          in: header
+          description: provide guid of the basket to identify basket
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketResponseModel'
+        '409':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketResponseModel'        
+  /carts/basketserviceupdate/:
+    patch:
+      tags:
+        - Carts Controller
+      summary: Adds product service to basket for the specified product
+      description: |-
+        - Adds specified service for the required product
+        - Send isSelected boolean as true to add product service to basket
+        - Send isSelected boolean as false to remove product service from basket
+      parameters:
+        - name: productCode
+          in: query
+          description: provide 9 digit product code
+          required: true
+          schema:
+            type: string
+        - name: servicecode
+          in: query
+          description: provide service Id associated with the product
+          required: true
+          schema:
+            type: string
+        - name: isSelected
+          in: query
+          description: Boolean which tells whether the service to be removed or added for the praticular product
+          required: true
+          schema:
+            type: boolean    
+        - name: guid
+          in: header
+          description: provide guid of the basket to identify basket
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketResponseModel' 
+        '409':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketResponseModel'
+  /carts/addtobasket/:
+    post:
+      tags:
+        - Carts Controller
+      summary: Adds product to basket
+      description: |-
+        - Adds single quantity of product to basket
+      parameters:
+        - name: productCode
+          in: query
+          description: provide 9 digit product code
+          required: true
+          schema:
+            type: string
+        - name: guid
+          in: header
+          description: provide guid of the basket to identify basket
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketResponseModel'
+        '409':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketResponseModel'
+  /carts/basketdeliveryserviceupdate/:
+    post:
+      tags:
+        - Carts Controller
+      summary: Adds Delivery Serivce to basket
+      description: |-
+        - Adds/updates delivery service to the basket
+      parameters:
+        - name: servicecode
+          in: query
+          description: provide delivery service code
+          required: true
+          schema:
+            type: string
+        - name: guid
+          in: header
+          description: provide guid of the basket to identify basket
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketResponseModel'
+        '409':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketResponseModel'
+  /carts/loadbasket/:
+    get:
+      tags:
+        - Carts Controller
+      summary: provides details of user cart
+      description: |-
+        - provides details of user cart
+      parameters:
+        - name: guid
+          in: header
+          description: provide guid of the basket to identify basket
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCartModel'
+        '404':
+          description: cart not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  guid:
+                    type: string
+components:
+  schemas:
+    BaseProductModel:
+      type: object
+      properties:
+        productName:
+          type: string
+        productModelId:
+          type: string
+        productDescription:
+          type: string
+        productCategory:
+          type: string
+        productId:
+          type: string
+        productUrl:
+          type: string
+        isPremiumProduct:
+          type: boolean
+        priceValues:
+          type: object
+          properties:
+            basePrice:
+              type: number
+            offerPrice:
+              type: number
+        stockData:
+          type: object
+          properties:
+            quantity:
+              type: number
+            stockStatus:
+              type: string
+              enum:
+                - INS
+                - LS
+                - OS
+        availableForSale:
+          type: boolean
+    GuestUserModel:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+    BasketResponseModel:
+      type: object
+      properties:
+        error:
+          type: boolean
+        message:
+          type: string
+    CreateAccountModel:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    UserLoginModel:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    ServiceModel:
+      type: object
+      properties:
+        serviceType:
+          type: string
+          enum:
+            - Product
+            - Delivery
+        priceValues:
+          type: object
+          properties:
+            basePrice:
+              type: number
+            offerPrice:
+              type: number
+        isMultiplier:
+          type: boolean
+        serviceDescription:
+          type: string
+        serviceName:
+          type: string
+        serviceId:
+          type: string
+    UserCartModel:
+      type: object
+      properties:
+        basketDeliveryServices:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceModel'
+        basketCostSummary:
+          type: object
+          properties:
+            serviceSubTotalWithOutDiscount:
+              type: number
+            orderTotalWithDiscount:
+              type: number
+            lineSubTotalWithDiscount:
+              type: number
+            serviceSubTotalWithDiscount:
+              type: number
+            orderTotalWithOutDiscount:
+              type: number
+            cartCount:
+              type: number
+            cartSavings:
+              type: number
+            lineSubTotalWithOutDiscount:
+              type: number
+        products:
+          type: array
+          items:
+            properties:
+              quantity:
+                type: number
+              priceValues:
+                type: object
+                properties:
+                  basePrice:
+                    type: number
+                  offerPrice:
+                    type: number
+                  lineTotal:
+                    type: number  
+              productId:
+                type: string
+              productUrl:
+                type: string
+              productModelId:
+                type: string
+              productDescription:
+                type: string
+              productName:
+                type: string
+              productServices:
+                type: array
+                items:
+                  properties:
+                    serviceType:
+                      type: string
+                    isMultiplier:
+                      type: boolean
+                    isServiceSelected:
+                      type: boolean  
+                    serviceDescription:
+                      type: string
+                    serviceId:
+                      type: string
+                    priceValues:
+                      type: object
+                      properties:
+                        basePrice:
+                          type: number
+                        offerPrice:
+                          type: number
+                        lineTotal:
+                          type: number  
+    AddressModel:
+      type: object
+      properties: 
+        addressValues:
+          type: array
+          items:
+            properties:
+              pk:
+                type: string
+              emailId:
+                type: string
+              line1:
+                type: string
+              line2:
+                type: string
+              pincode:
+                type: string
+              countryCode:
+                type: string
+              country: 
+                type: string
+              phoneNumber:
+                type: string
+              city:
+                type: string
+              state:
+                type: string
+              addressType:
+                type: string
+                enum:
+                  - BILLING
+                  - SHIPPING
+              addressTitle:
+                type: string
+              busnisessType:
+                type: string
+                enum:
+                  - B2C
+                  - B2B
+              companyName:
+                type: string
+              updatedAt:
+                type: string
+        error:
+          type: boolean
+        emailId:
+          type: string
+        message:
+          type: string
+                  

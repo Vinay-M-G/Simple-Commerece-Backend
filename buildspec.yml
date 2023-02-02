@@ -1,0 +1,42 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+  build:
+    commands:
+      - aws ecr get-login-password --region {{AWS region}} | docker login --username AWS --password-stdin {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com
+      - echo Log in to ECR successfull  
+      - echo Build started on `date`
+      - echo Building the Docker images...
+      - docker-compose --file=docker-compose.yml build
+      ###
+      # - echo preparing eureka server ....
+      # - docker tag app-eurekaserver:latest {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-eurekaserver:latest
+      # - docker push {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-eurekaserver:latest
+      ###
+      - echo preparing product server.....
+      - docker tag app-productserver:latest {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-productserver:latest
+      - docker push {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-productserver:latest
+      ###
+      - echo preparing welcome server.....
+      - docker tag app-welcomeserver:latest {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-welcomeserver:latest
+      - docker push {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-welcomeserver:latest
+      ###
+      - echo preparing Api Gateway Server.....
+      - docker tag app-apigateway:latest {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-apigateway:latest
+      - docker push {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-apigateway:latest
+
+      ###
+      - echo preparing user and cart Server.....
+      - docker tag app-userandcartservice:latest {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-userandcartservice:latest
+      - docker push {{AWS Account Id}}.dkr.ecr.{{AWS region}}.amazonaws.com/app-userandcartservice:latest         
+  post_build:
+    commands:
+      - echo Build completed on `date`
+#      - echo Pushing the Docker image...
+#      - docker-compose --file=docker-compose.yml push
+      - echo push completed
