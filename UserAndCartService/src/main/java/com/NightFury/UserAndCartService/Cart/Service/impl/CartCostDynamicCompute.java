@@ -22,6 +22,7 @@ public class CartCostDynamicCompute implements CartCostCompute {
 	public static final String BASE_PRICE = "basePrice";
 	public static final String OFFER_PRICE = "offerPrice";
 	public static final String PRICE_COMPONENT = "priceValues";
+	private static final String LINE_ITEM_PRICE = "lineTotal";
 	
 	@Autowired
 	SupportFunctionsProvider supportFunctionsProvider;
@@ -60,8 +61,9 @@ public class CartCostDynamicCompute implements CartCostCompute {
 			itemDetails.stream().forEach( element -> {
 				
 				Map<String , Double> productPrice = (Map<String, Double>) element.get(PRICE_COMPONENT);
-				double payablePrice = productPrice.get("lineTotal");
-				double basePayablePrice = productPrice.get(BASE_PRICE) * cartItemCount;
+				
+				double payablePrice = productPrice.get(LINE_ITEM_PRICE);
+				double basePayablePrice = productPrice.get(BASE_PRICE) * (int) element.get("quantity");
 				
 				cartCostModel.setLineSubTotalWithoutDiscount(cartCostModel.getLineSubTotalWithoutDiscount() + basePayablePrice);
 				cartCostModel.setLineSubTotalWithDiscount(cartCostModel.getLineSubTotalWithDiscount() + payablePrice);

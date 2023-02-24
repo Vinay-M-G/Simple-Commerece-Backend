@@ -14,4 +14,6 @@ public interface UserAddress {
 	public boolean updateUserAddress(JsonObject requestBody, String emailId);
 	
 	public boolean updateUserAddressForCart(String guid, JsonObject requestBody);
+	
+	public List<UserAddressModel> getSelectedCartAddress(String guid, String emailId);
 }

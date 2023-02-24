@@ -1,21 +1,16 @@
-package com.NightFury.UserAndCartService.User.Entity;
+package com.NightFury.UserAndCartService.Order.Entity;
 
-import java.sql.Timestamp;
-
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.persistence.Id;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.SecondaryTable;
+import javax.persistence.Table;
 
 @Entity
-@Table(name = "address_entries")
-//@SecondaryTable(name = "order_address_entries")
-public class UserAddressModel{
-	
+@Table(name = "order_address_entries")
+public class OrderAddressModel{
+
 	@Id
 	private String pk;
+	private String orderId;
 	private String emailId;
 	private String line1;
 	private String line2;
@@ -29,7 +24,6 @@ public class UserAddressModel{
 	private String addressTitle;
 	private String businessType;
 	private String companyName;
-	private Timestamp updatedAt;
 
 	public String getPk() {
 		return pk;
@@ -39,12 +33,12 @@ public class UserAddressModel{
 		this.pk = pk;
 	}
 
-	public String getEmailId() {
-		return emailId;
+	public String getOrderId() {
+		return orderId;
 	}
 
-	public void setEmailId(String emailId) {
-		this.emailId = emailId;
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 
 	public String getLine1() {
@@ -135,20 +129,20 @@ public class UserAddressModel{
 		this.businessType = businessType;
 	}
 
-	public Timestamp getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(Timestamp updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
 	public String getCompanyName() {
 		return companyName;
 	}
 
 	public void setCompanyName(String companyName) {
 		this.companyName = companyName;
+	}
+
+	public String getEmailId() {
+		return emailId;
+	}
+
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
 	}
 
 }

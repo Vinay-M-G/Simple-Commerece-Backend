@@ -22,7 +22,11 @@ spring:
             - id: CartService
               uri: lb://USERANDCARTSERVER
               predicates:
-              - Path=/api/v1/carts/**            
+              - Path=/api/v1/carts/**
+            - id: OrderService
+              uri: lb://USERANDCARTSERVER
+              predicates:
+              - Path=/api/v1/orders/**              
          default-filters:
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
          globalcors:

@@ -39,4 +39,4 @@ services:
             dockerfile: Dockerfile
         image: app-userandcartservice:latest
        # ports:
-           # - 3001:3001           
+           # - 3001:3001

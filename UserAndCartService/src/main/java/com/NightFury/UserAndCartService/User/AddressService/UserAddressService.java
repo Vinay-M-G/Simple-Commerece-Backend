@@ -38,7 +38,7 @@ public class UserAddressService {
 	@Value("${address.get.failed}")
 	private String noAddressValuesFound;
 	
-	@Value("${address.emailId.NotFound}")
+	@Value("${address.emailid.notfound}")
 	private String emailNotFound;
 	
 	@Autowired
@@ -116,6 +116,39 @@ public class UserAddressService {
 				return response;
 			}
 			
+		}
+		
+		response = supportFunctionsProvider.responseBuilderForCartUpdate(true, emailNotFound);
+		return response;
+	}
+	
+	public Map<String, Object> getSelectedAddressElementsForCart(String guid){
+		Map<String, Object> response = new HashMap<String, Object>();
+		
+		String emailId = null;
+		Optional<CartUserAssociationModel> cartUserAssociationModel = cartUserAssociationRepository.findById(guid);
+		
+		if(cartUserAssociationModel.isPresent()) {
+			emailId = cartUserAssociationModel.get().getUserId();
+		}
+		
+		if(emailId != null) {
+			List<UserAddressModel> cartAddressList = userAddressHandler.getSelectedCartAddress(guid, emailId);
+			
+			if(!cartAddressList.isEmpty()) {
+				response = supportFunctionsProvider.responseBuilderForCartUpdate(false, addressValuesFound);
+				response.put("addressValues", cartAddressList);
+				response.put("emailId" , emailId);
+				
+				logger.info("Cart Address Response Body prepared for cart : " + guid);
+				return response;
+				
+			}else {
+				
+				response = supportFunctionsProvider.responseBuilderForCartUpdate(false, noAddressValuesFound);
+				response.put("emailId" , emailId);
+				return response; 
+			}
 		}
 		
 		response = supportFunctionsProvider.responseBuilderForCartUpdate(true, emailNotFound);

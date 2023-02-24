@@ -72,11 +72,12 @@ public class CartsController {
 	public ResponseEntity<?> sendCartDetails(@RequestHeader(value = "guid", required = true) String guid){
 		
 		Map<String , Object> response = cartServiceProvider.getCartDetails(guid);
-		if(!response.isEmpty()) {
+		
+		if (!(boolean) response.get("error")) {
+
 			return ResponseEntity.status(HttpStatus.OK).body(response);
-		}else {
-			response.put("guid", guid);
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+		} else {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
 		}
 		
 	}

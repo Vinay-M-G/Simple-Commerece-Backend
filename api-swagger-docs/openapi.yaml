@@ -1,13 +1,18 @@
 openapi: 3.0.3
 info:
-  title: NightFury ECommerce Application
+  title: ECommerce Application
   description: >-
-    This is E-commmerce API which provides simple endpoints which can be used by
+    This is E-commmerce REST API which provides simple endpoints which can be used by
     anyone to instantly to lauch a backend Ecommerece servers with minimum
     customizations and also helps to scale within less time
+    
+    - Project Details :
+    
+        - [Backend Server Code](https://github.com/Vinay-M-G/Simple-Commerece-Backend)
+        - [Frontend Application Code](https://github.com/Vinay-M-G/Simple-Commerece--frontend-)
   contact:
     email: vinay.giriswamy@gmail.com
-  version: 2.0.4
+  version: 3.0.0
 servers:
   - url: http://{EC2 Server Id}:9001/api/v1
     variables:
@@ -20,6 +25,10 @@ tags:
     description: Everything about carts
   - name: User Controller
     description: Everything about user flow
+  - name: Order Controller
+    description: Everything about Orders  
+  - name: Miscellaneous
+    description: Miscellaneous Controllers
 paths:
   /products/listall:
     get:
@@ -603,6 +612,140 @@ paths:
                 properties:
                   guid:
                     type: string
+  /orders/getorder/{orderId}:
+    get:
+      tags:
+        - Order Controller
+      summary: provides order details based on order id
+      description: |-
+        - provides details of an order based on order id
+      parameters:
+        - name: guid
+          in: header
+          description: provide guid of the basket to identify basket
+          required: true
+          schema:
+            type: string
+        - name: orderId
+          in: path
+          description: Order id in format xxx-xxxx-xxx. 
+          required: true
+          schema:
+            type: string    
+      responses:
+        '200':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderModel'
+        '404':
+          description: Order Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseModel'
+  /orders/createorder/{cartPrice}:
+    post:
+      tags:
+        - Order Controller
+      summary: Creates an Order 
+      description: |-
+        - Creates an order if there are no validation errors
+        - Cart will be validated based on parameters such as availability of stock, online sellability of the product, changes in cart price, valid guid
+        - Once validation is succeeded, order will be saved and a new order id will be created
+      parameters:
+        - name: guid
+          in: header
+          description: provide guid of the basket to identify basket
+          required: true
+          schema:
+            type: string
+        - name: cartPrice
+          in: path
+          description: provide the final payable price of the cart. Should be greater than 1. 
+          required: true
+          schema:
+            type: string    
+      responses:
+        '201':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    default: false
+                  message:
+                    type: string
+                  orderId:
+                    type: string
+        '404':
+          description: Cart Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseModel'
+        '409':
+          description: Validation Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseModel'        
+  /welcome/requestdetails:
+    get:
+      tags:
+        - Miscellaneous
+      summary: provides order details based on order id
+      description: |-
+        - provides details to render welcome page
+      responses:
+        '200':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WelcomePageResponseModel'
+  /products/getkeyconfigurations:
+    get:
+      tags:
+        - Products Controller
+      summary: provides facet details related to products
+      description: provides facet details related to products for filtering, sorting and category of products
+      responses:
+        '200':
+          description: Successfull response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sortTypes:
+                    type: array
+                    items:
+                      properties:
+                        value:
+                          type: boolean
+                        key:
+                          type: string
+                  filters:
+                    type: array
+                    items:
+                      properties:
+                        value:
+                          type: boolean
+                        key:
+                          type: string
+                  categories:
+                    type: array
+                    items:
+                      properties:
+                        value:
+                          type: boolean
+                        key:
+                          type: string        
 components:
   schemas:
     BaseProductModel:
@@ -822,4 +965,171 @@ components:
           type: string
         message:
           type: string
-                  
+    OrderModel:
+      type: object
+      properties:
+        error:
+          type: boolean
+          default: false
+        message:
+          type: string
+        OrderSummary:
+          type: array
+          items:
+            properties:
+              guid: 
+                type: string
+              orderId:
+                type: string
+              createdAt:
+                type: string
+              emailId:
+                type: string
+        OrderEntries:
+          type: array
+          items:
+            properties:
+              pk:
+                type: string
+              orderId:
+                type: string
+              entryId:
+                type: string
+              entryCode:
+                type: string
+              productModelId:
+                type: string
+              codeShortDescription:
+                type: string
+              basePrice:
+                type: number
+              payablePrice:
+                type: number
+              quantity:
+                type: number
+              lineTotal:
+                type: number
+        OrderCostSummary:
+          type: array
+          items:
+            properties:
+              orderId:
+                type: string
+              lineTotalWithDiscount:
+                type: number
+              serviceTotalWithDiscount:
+                type: number
+              orderTotalWithDiscount:
+                type: number
+              lineTotalWithoutDiscount:
+                type: number
+              serviceTotalWithoutDiscount:
+                type: number
+              orderTotalWithoutDiscount:
+                type: number  
+              totalQuantity:
+                type: number
+              orderSavings:
+                type: number
+        orderAddressDetails:
+          type: array
+          items:
+            properties:
+              pk:
+                type: string
+              orderId:
+                type: string
+              emailId:
+                type: string
+              line1:
+                type: string
+              line2:
+                type: string
+              pincode:
+                type: string
+              countryCode:
+                type: string
+              country: 
+                type: string
+              phoneNumber:
+                type: string
+              city:
+                type: string
+              state:
+                type: string
+              addressType:
+                type: string
+                enum:
+                  - BILLING
+                  - SHIPPING
+              addressTitle:
+                type: string
+              busnisessType:
+                type: string
+                enum:
+                  - B2C
+                  - B2B
+              companyName:
+                type: string
+    ResponseModel:
+      type: object
+      properties:
+        error: 
+          type: boolean
+        message:
+          type: string
+    WelcomePageResponseModel:
+      type: object
+      properties:
+        productCategoryAvailable:
+          type: array
+          items:
+            properties:
+              rank:
+                type: number
+              productModelCount:
+                type: number
+              categoryName:
+                type: string
+        contentForWhyUS:
+          type: array
+          items:
+            properties:
+              rank:
+                type: number
+              content:
+                type: string
+        isLoginEnabled:
+          type: boolean
+        isGuestEnabled:
+          type: boolean
+        isCreateAccountEnabled:
+          type: boolean
+        contactDetails:
+          type: object
+          properties:
+            phoneNumber:
+              type: string
+            Address1:
+              type: string
+            email:
+              type: string
+        premiumProducts:
+          type: array
+          items:
+            properties:
+              priceValues:
+                type: object
+                properties:
+                  basePrice:
+                    type: number
+                  offerPrice:
+                    type: number
+              imageUrl:
+                type: string
+              description:
+                type: string
+              productModelId:
+                type: string
+              productName:
+                type: string

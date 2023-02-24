@@ -17,9 +17,13 @@ import com.NightFury.UserAndCartService.Cart.Service.impl.CartDataCustomisationH
 import com.NightFury.UserAndCartService.Cart.Service.impl.CartDataHandler;
 import com.NightFury.UserAndCartService.Cart.Service.impl.CartEntryCreationHandler;
 import com.NightFury.UserAndCartService.Cart.Service.impl.ComputeCartCount;
+import com.NightFury.UserAndCartService.Support.SupportFunctionsProvider;
 
 @Service
 public class CartServiceProvider {
+	
+	private static final String NO_PRODUCTS_IN_CART = "Empty Cart";
+	private static final String VALID_CART = "Valid Cart with products";
 	
 	@Autowired
 	CartEntryCreationHandler cartEntryCreationHandler;
@@ -35,6 +39,9 @@ public class CartServiceProvider {
 	
 	@Autowired
 	ComputeCartCount computeCartCount;
+	
+	@Autowired
+	SupportFunctionsProvider supportFunctionsProvider;
 	
 	public Map<String, Object> createProductCartEntry(String productCode, String guid){
 		return cartEntryCreationHandler.addProduct(productCode, guid);
@@ -63,27 +70,33 @@ public class CartServiceProvider {
 		
 		List<String> products = cartDataHandler.getProductsInCart(guid);
 		
-		products.stream().forEach( element -> {
-			JsonObject productDetail = cartDataHandler.getProductDetailForCart(element);
-			JsonArray serviceDetails = cartDataHandler.getServiceDetailForProduct(element);
+		if(products.size() != 0) {
 			
-			Map<String , Object> productEntry = cartDataCustomisationHandler.productMapper(productDetail, serviceDetails, guid);
-			cartEntries.add(productEntry);
+			response = supportFunctionsProvider.responseBuilderForCartUpdate(false, VALID_CART);
+			products.stream().forEach( element -> {
+				JsonObject productDetail = cartDataHandler.getProductDetailForCart(element);
+				JsonArray serviceDetails = cartDataHandler.getServiceDetailForProduct(element);
+				
+				Map<String , Object> productEntry = cartDataCustomisationHandler.productMapper(productDetail, serviceDetails, guid);
+				cartEntries.add(productEntry);
+				
+			});
 			
-		});
+			response.put("products", cartEntries);
+			
+			JsonArray serviceDetails = cartDataHandler.getDeliveryServiceForProducts(products);
+			int cartTotalQuantity = computeCartCount.getCartQuantity(cartEntries);
+			deliveryEntries = cartDataCustomisationHandler.serviceMapper(serviceDetails, guid, null, cartTotalQuantity);
+			response.put("basketDeliveryServices", deliveryEntries);
+			
+			CartCostModel cartCostModel = cartCostDynamicCompute.computeCartCost(cartEntries, deliveryEntries);
+			Map<String , Double> cartPriceEntries = cartCostDynamicCompute.cartCostMap(cartCostModel);
+			
+			response.put("basketCostSummary", cartPriceEntries);
+			return response;
+		}
 		
-		response.put("products", cartEntries);
 		
-		JsonArray serviceDetails = cartDataHandler.getDeliveryServiceForProducts(products);
-		int cartTotalQuantity = computeCartCount.getCartQuantity(cartEntries);
-		deliveryEntries = cartDataCustomisationHandler.serviceMapper(serviceDetails, guid, null, cartTotalQuantity);
-		response.put("basketDeliveryServices", deliveryEntries);
-		
-		CartCostModel cartCostModel = cartCostDynamicCompute.computeCartCost(cartEntries, deliveryEntries);
-		Map<String , Double> cartPriceEntries = cartCostDynamicCompute.cartCostMap(cartCostModel);
-		
-		response.put("basketCostSummary", cartPriceEntries);
-		
-		return response;
+		return supportFunctionsProvider.responseBuilderForCartUpdate(true, NO_PRODUCTS_IN_CART);
 	}
 }

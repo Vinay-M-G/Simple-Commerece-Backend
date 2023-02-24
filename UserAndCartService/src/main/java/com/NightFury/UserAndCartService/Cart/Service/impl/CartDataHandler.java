@@ -52,7 +52,7 @@ public class CartDataHandler implements CartDataProvider {
 			return globalJsonReader.sendJsonArrayFromString(response);
 			
 		}catch(Exception ex) {
-			logger.error("Error occured while fetching details for product: " + productCode + ex.toString());
+			logger.error("Error occured while fetching service details for product: " + productCode + ex.toString());
 			return null;
 		}
 		
@@ -79,7 +79,7 @@ public class CartDataHandler implements CartDataProvider {
 			return globalJsonReader.sendJsonArrayFromString(response);
 			
 		}catch(Exception ex) {
-			logger.error("Error occured while fetching details for product: " + codes + ex.toString());
+			logger.error("Error occured while fetching details for Delivery Service: " + codes + ex.toString());
 			return null;
 		}
 		

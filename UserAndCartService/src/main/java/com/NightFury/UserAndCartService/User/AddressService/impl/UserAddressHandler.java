@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.NightFury.UserAndCartService.UserAndCartServiceApplication;
+import com.NightFury.UserAndCartService.Order.Entity.OrderAddressModel;
 import com.NightFury.UserAndCartService.Support.SupportFunctionsProvider;
 import com.NightFury.UserAndCartService.User.AddressService.dao.UserAddress;
 import com.NightFury.UserAndCartService.User.Entity.CartAddressModel;
@@ -192,6 +193,38 @@ public class UserAddressHandler implements UserAddress {
 			return false;
 		}
 
+	}
+
+	@Override
+	public List<UserAddressModel> getSelectedCartAddress(String guid, String emailId) {
+		
+		List<UserAddressModel> selectedAdrressValues = new ArrayList<>();
+		
+		try {
+			
+			Optional<List<CartAddressModel>> selectedAddressOptions = cartAddressRepository.getAddressValueByGuid(guid);
+			
+			if(selectedAddressOptions.isPresent()) {
+				
+				selectedAddressOptions.get().stream().forEach( element -> {
+					
+					Optional<List<UserAddressModel>> addressValue = userAddressRepository.findByEmailIdAndBusinessTypeAndAddressTitleAndAddressType(emailId, element.getBusinessType(), 
+							element.getAddressTitle(), element.getAddressType());
+					
+					if(addressValue.isPresent()) {
+						if(addressValue.get().size() == 1) {
+							selectedAdrressValues.add(addressValue.get().get(0));
+						}
+					}
+					
+				});
+			}
+			
+		}catch(Exception ex) {
+			logger.error("Exception occured while reteriving Address values for cart : " + ex.toString());
+		}
+		
+		return selectedAdrressValues;
 	}
 
 }

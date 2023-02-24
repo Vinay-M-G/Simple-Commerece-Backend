@@ -109,5 +109,18 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
 		}
 	}
+	
+	@GetMapping(value = "/getcartaddress" , produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<?> getCartAddress(@RequestHeader(value = "guid") String guid){
+		
+		Map<String, Object> responseBody = userAddressService.getSelectedAddressElementsForCart(guid);
+		
+		if(!(boolean)responseBody.get("error")) {
+
+			return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+		}else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
+		}
+	}
 
 }

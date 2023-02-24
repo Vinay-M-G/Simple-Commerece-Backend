@@ -1,1 +1,4 @@
-
+buildspec.yml
+docker-compose.yml
+docker-compose-prod.yml
+AWS EC2 congifuration for running docker images.txt

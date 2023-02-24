@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Service;
 
@@ -39,11 +41,22 @@ public class SupportFunctionsProvider {
 		return cookie;
 	}
 	
+	public void earseAllCookies(HttpServletRequest request, HttpServletResponse response) {
+		Cookie[] cookies = request.getCookies();
+	    if (cookies != null)
+	        for (Cookie cookie : cookies) {
+	            cookie.setValue("");
+	            cookie.setPath("/");
+	            cookie.setMaxAge(0);
+	            response.addCookie(cookie);
+	        }
+	}
+	
 	/*
 	 * This function is used by cart populator functions whenever there is an update
 	 * in cart entries
 	 * 
-	 * Extending the functionality for Address classes as well
+	 * Extending the functionality for Address classes and Order Classes as well
 	 * 
 	 * @Author: Vinay M G
 	 */

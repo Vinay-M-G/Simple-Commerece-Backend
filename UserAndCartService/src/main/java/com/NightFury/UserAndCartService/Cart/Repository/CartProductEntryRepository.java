@@ -29,4 +29,6 @@ public interface CartProductEntryRepository extends JpaRepository<CartProductEnt
 	@Query(value = "DELETE FROM cart_product_entries WHERE guid = ?1 AND product_code = ?2", nativeQuery = true)
 	public int removeProductEntry(String guid , String productCode);
 	
+	public List<CartProductEntryModel> findByGuid(String guid);
+	
 }
